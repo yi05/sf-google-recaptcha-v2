@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>48.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Google reCAPTCHA v2 (LWC)</masterLabel>
+    <description
+  >Lightning Web Component for Google reCAPTCHA v2 checkbox integration. Provides human verification for flows, communities, and Lightning pages with both client-side and server-side validation.</description>
+    <targets>
+        <target>lightning__FlowScreen</target>
+        <target>lightning__AppPage</target>
+        <target>lightning__RecordPage</target>
+        <target>lightning__HomePage</target>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__FlowScreen">
+            <property
+        name="isHuman"
+        type="Boolean"
+        label="Is Human?"
+        description="Output variable that indicates whether the user has been verified as human"
+        default="false"
+      />
+            <property
+        name="originPageURL"
+        type="String"
+        label="Origin Page URL (optional)"
+        description="Comma-separated list of URLs where your flow runs (e.g., https://example.com, https://myOrg.force.com)"
+      />
+            <property
+        name="required"
+        type="Boolean"
+        label="Required?"
+        description="Makes it required to pass the reCAPTCHA"
+        default="false"
+      />
+            <property
+        name="requiredMessage"
+        type="String"
+        label="Required Message (optional)"
+        description="Error message displayed if user tries to proceed without completing the reCAPTCHA"
+      />
+            <property
+        name="requiredOnce"
+        type="Boolean"
+        label="Required only once?"
+        description="If true, the reCAPTCHA will only appear once and remain validated"
+        default="false"
+      />
+            <property
+        name="enableServerSideVerification"
+        type="Boolean"
+        label="Server Side Verification?"
+        description="Enable server-side verification of the reCAPTCHA response"
+        default="false"
+      />
+            <property
+        name="siteKey"
+        type="String"
+        label="Recaptcha Site Key"
+        description="The site key for your domain"
+        default="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+      />
+            <property
+        name="secretKey"
+        type="String"
+        label="Recaptcha Secret Key"
+        description="The secret key for your domain"
+        default="6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
+      />
+            <property
+        name="frameTitle"
+        type="String"
+        label="Recaptcha Frame Title (optional)"
+        description="Title for the iframe element (for accessibility). Defaults to: I'm not a robot captcha"
+      />
+            <property
+        name="flowGuid"
+        type="String"
+        label="Flow Interview GUID"
+        description="The Flow Interview GUID ($Flow.InterviewGuid). Required for server-side verification"
+      />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>
