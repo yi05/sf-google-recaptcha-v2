@@ -10,8 +10,8 @@ global with sharing class GoogleRecaptchaHandlerTest {
     @IsTest static void testFetchBaseURL() {
         List<String> myURLs = GoogleRecaptchaHandler.fetchBaseURL();
 
-        System.assertEquals(4, myURLs.size());
-        System.assert(myURLs.contains(URL.getSalesforceBaseUrl().toExternalForm()));
+        System.assertEquals(3, myURLs.size());
+        System.assert(myURLs.contains(URL.getOrgDomainUrl().toExternalForm()));
     }
 
     global class RecaptchaHttpCalloutMock implements HttpCalloutMock {
