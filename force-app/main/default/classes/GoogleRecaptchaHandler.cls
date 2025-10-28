@@ -66,16 +66,16 @@ public with sharing class GoogleRecaptchaHandler {
      * @description Validates that reCAPTCHA has been completed for the given Flow Interview
      * This invocable method checks platform cache for a valid verification record
      * 
-     * @param flowIntervewGuids List of Flow Interview GUIDs to validate
+     * @param flowInterviewGuids List of Flow Interview GUIDs to validate
      * @return List<Boolean> List of validation results corresponding to input GUIDs
      */
     // Validate the Google reCAPTCHA has been submitted
     @InvocableMethod (label='Validate reCAPTCHA' description='Use the Flow Interview ID to validate the reCAPTCHA has been submitted by user')
-    public static List<Boolean> validateRecaptcha(List<String> flowIntervewGuids) {  
+    public static List<Boolean> validateRecaptcha(List<String> flowInterviewGuids) {  
         
         List<Boolean> validated = new List<Boolean>();
 
-        for (String flowInterviewGuid :flowIntervewGuids) {
+        for (String flowInterviewGuid :flowInterviewGuids) {
 
             // If we have a valid validation record
             if (Cache.Org.contains(getCacheKey(flowInterviewGuid))) {
