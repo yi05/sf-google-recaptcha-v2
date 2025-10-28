@@ -67,4 +67,76 @@ public with sharing class GoogleRecaptchaHandler {
     public static String getCacheKey(String flowInterviewGuid) {
         return 'local.GoogleRecaptchaVerification.' + flowInterviewGuid.split('-')[0];
     }
+
+    // Fetch Google reCAPTCHA settings from Custom Metadata Type
+    @AuraEnabled(cacheable=true)
+    public static Map<String, String> getRecaptchaSetting(String settingName) {
+        Map<String, String> result = new Map<String, String>();
+        
+        try {
+            // Query the Custom Metadata Type
+            List<GoogleRecaptchaSetting__mdt> settings = [
+                SELECT SiteKey__c, SecretKey__c 
+                FROM GoogleRecaptchaSetting__mdt 
+                WHERE DeveloperName = :settingName 
+                LIMIT 1
+            ];
+            
+            if (!settings.isEmpty()) {
+                // Only return the site key to LWC (secret key stays on server)
+                result.put('siteKey', settings[0].SiteKey__c);
+            }
+        } catch (Exception e) {
+            System.debug('Error fetching reCAPTCHA settings: ' + e.getMessage());
+        }
+        
+        return result;
+    }
+
+    // Verify reCAPTCHA response using settings from Custom Metadata Type
+    @AuraEnabled
+    public static Boolean verifyResponse(String recaptchaResponse, String recaptchaSettingName, String flowInterviewGuid) {
+        try {
+            // Retrieve the secret key from Custom Metadata Type
+            List<GoogleRecaptchaSetting__mdt> settings = [
+                SELECT SecretKey__c 
+                FROM GoogleRecaptchaSetting__mdt 
+                WHERE DeveloperName = :recaptchaSettingName 
+                LIMIT 1
+            ];
+            
+            if (settings.isEmpty()) {
+                System.debug('No reCAPTCHA setting found with name: ' + recaptchaSettingName);
+                return false;
+            }
+            
+            String secretKey = settings[0].SecretKey__c;
+            
+            // Make the verification request to Google
+            Http http = new Http();
+            HttpRequest request = new HttpRequest();
+            request.setEndpoint('https://www.google.com/recaptcha/api/siteverify');
+            request.setMethod('POST');
+            request.setBody('secret=' + secretKey + '&response=' + recaptchaResponse);
+            HttpResponse response = http.send(request);
+
+            if (response.getStatusCode() == 200) {
+                System.debug(response.getBody());
+                Map<String, Object> result = (Map<String, Object>) JSON.deserializeUntyped(response.getBody());
+
+                if (result.containsKey('success') && result.get('success') == true) {      
+                    // Store in platform cache
+                    Cache.Org.put(getCacheKey(flowInterviewGuid), DateTime.now());
+                    return true;      
+                } else {
+                    return false;
+                }
+            }
+            
+            return false;
+        } catch (Exception e) {
+            System.debug('Error verifying reCAPTCHA: ' + e.getMessage());
+            return false;
+        }
+    }
 }

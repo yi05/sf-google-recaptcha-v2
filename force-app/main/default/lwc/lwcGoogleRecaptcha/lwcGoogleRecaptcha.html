@@ -1,0 +1,13 @@
+<template>
+  <!-- In case requiredOnce is set to true and the captcha has not been verified, display it -->
+  <template if:true={shouldDisplayCaptcha}>
+    <iframe
+      data-id="captchaFrame"
+      src={iframeSrc}
+      width="350"
+      height="100"
+      style="border: 0px; overflow: hidden"
+      title={frameTitle}
+    ></iframe>
+  </template>
+</template>
