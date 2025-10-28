@@ -17,10 +17,10 @@ The flow component actually relies on three parts: An aura component, an HTML st
 
 This repository now includes both an **Aura component** and a **Lightning Web Component (LWC)** implementation:
 
-- **Aura Component**: `googleRecaptcha` - Original implementation
-- **LWC Component**: `lwcGoogleRecaptcha` - Modern LWC equivalent with same functionality
+- **Aura Component**: `googleRecaptcha` - Original implementation (uses component properties for keys)
+- **LWC Component**: `lwcGoogleRecaptcha` - Modern LWC with enhanced security (uses Custom Metadata Type for keys)
 
-Both components offer identical features and can be used interchangeably. The LWC version is recommended for new implementations as it follows modern Salesforce development patterns.
+Both components offer identical features. The LWC version is recommended for new implementations as it follows modern Salesforce development patterns and provides enhanced security by storing secret keys server-side only.
 
 ## Flow input and output variables
 
@@ -73,24 +73,54 @@ The LWC component `lwcGoogleRecaptcha` offers the same functionality as the Aura
 You can add the LWC component to Lightning App Pages, Record Pages, Home Pages, and Community Pages through the Lightning App Builder.
 
 ### Component Properties (LWC)
-All properties from the Aura component are available in the LWC version:
+
+**Required Property:**
+- `google-recaptcha-setting-name` (googleRecaptchaSettingName): **Required**. Name of the Custom Metadata Type record (GoogleRecaptchaSetting__mdt) containing your site and secret keys
+
+**Other Properties:**
 - `is-human` (isHuman): Output variable for human verification status
 - `origin-page-url` (originPageURL): Comma-separated list of allowed URLs
 - `required`: Makes the reCAPTCHA required (default: false - set to true when needed)
 - `required-message` (requiredMessage): Custom error message
 - `required-once` (requiredOnce): Show captcha only once
 - `enable-server-side-verification` (enableServerSideVerification): Enable server verification (default: false - set to true when needed)
-- `site-key` (siteKey): Your Google reCAPTCHA site key
-- `secret-key` (secretKey): Your Google reCAPTCHA secret key
 - `frame-title` (frameTitle): Accessibility title for the iframe
 - `flow-guid` (flowGuid): Flow Interview GUID for verification
 
+**Security Enhancement:**
+The LWC component uses Custom Metadata Type to securely store your Google reCAPTCHA keys. The secret key is never exposed to the client and is only accessed server-side during verification.
+
+### Setting Up Custom Metadata Type (Required for LWC)
+
+Before using the LWC component, you must create a Custom Metadata Type record:
+
+1. Navigate to **Setup → Custom Metadata Types → Manage Records** next to `GoogleRecaptchaSetting`
+2. Click **New** to create a record
+3. Enter:
+   - **Label**: e.g., "Portal1 Google Recaptcha Setting"
+   - **GoogleRecaptchaSetting Name**: e.g., "Portal1GoogleRecaptchaSetting" (use this in the component)
+   - **Site Key**: Your Google reCAPTCHA site key
+   - **Secret Key**: Your Google reCAPTCHA secret key
+4. Save the record
+
+**Example Usage:**
+```xml
+<c-lwc-google-recaptcha
+    google-recaptcha-setting-name="Portal1GoogleRecaptchaSetting"
+    is-human={isHuman}
+    required={true}
+    enable-server-side-verification={true}
+    flow-guid={flowGuid}
+></c-lwc-google-recaptcha>
+```
+
 ### Key Features of LWC Implementation
+- **Enhanced Security**: Secret keys stored in Custom Metadata Type, never exposed to client
 - Comprehensive JSDoc documentation for all methods and properties
 - Modern ES6+ JavaScript with proper lifecycle hooks
 - ESLint compliant code following Salesforce standards
 - Better memory management with proper cleanup in `disconnectedCallback`
-- Same security and validation features as Aura component
+- Site key fetched dynamically from server on component initialization
 
 ## Screenshots
 
