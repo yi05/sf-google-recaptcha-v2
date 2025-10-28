@@ -1,6 +1,7 @@
 import { LightningElement, api, track } from "lwc";
 import fetchBaseURL from "@salesforce/apex/GoogleRecaptchaHandler.fetchBaseURL";
-import isVerified from "@salesforce/apex/GoogleRecaptchaHandler.isVerified";
+import getRecaptchaSetting from "@salesforce/apex/GoogleRecaptchaHandler.getRecaptchaSetting";
+import verifyResponse from "@salesforce/apex/GoogleRecaptchaHandler.verifyResponse";
 import GOOGLE_RECAPTCHA from "@salesforce/resourceUrl/Google_Recaptcha";
 
 /**
@@ -17,19 +18,18 @@ import GOOGLE_RECAPTCHA from "@salesforce/resourceUrl/Google_Recaptcha";
  * @example
  * <c-lwc-google-recaptcha
  *     is-human={isHuman}
+ *     google-recaptcha-setting-name="Portal1GoogleRecaptchaSetting"
  *     origin-page-url="https://example.com"
  *     required={true}
  *     required-message="Please complete the captcha"
  *     required-once={false}
  *     enable-server-side-verification={true}
- *     site-key="your-site-key"
- *     secret-key="your-secret-key"
  *     frame-title="I'm not a robot captcha"
  *     flow-guid={flowGuid}
  * ></c-lwc-google-recaptcha>
  *
  * @author Salesforce Community
- * @version 1.0.0
+ * @version 2.0.0
  * @since 48.0
  */
 export default class LwcGoogleRecaptcha extends LightningElement {
@@ -53,6 +53,15 @@ export default class LwcGoogleRecaptcha extends LightningElement {
   set isHuman(value) {
     this._isHuman = value;
   }
+
+  /**
+   * Name of the Google reCAPTCHA Setting (Custom Metadata Type record)
+   * This is required to retrieve the site key securely from the server
+   * @type {string}
+   * @required
+   * @public
+   */
+  @api googleRecaptchaSettingName;
 
   /**
    * Comma-separated list of origin page URLs where the component is deployed
@@ -94,22 +103,6 @@ export default class LwcGoogleRecaptcha extends LightningElement {
   @api enableServerSideVerification = false;
 
   /**
-   * Google reCAPTCHA site key for your domain
-   * @type {string}
-   * @default "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
-   * @public
-   */
-  @api siteKey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI";
-
-  /**
-   * Google reCAPTCHA secret key for your domain
-   * @type {string}
-   * @default "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
-   * @public
-   */
-  @api secretKey = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe";
-
-  /**
    * Title for the iframe element (for accessibility)
    * @type {string}
    * @public
@@ -138,6 +131,13 @@ export default class LwcGoogleRecaptcha extends LightningElement {
   @track recaptchaResponse = "";
 
   /**
+   * Site key fetched from Custom Metadata Type
+   * @type {string}
+   * @private
+   */
+  @track siteKey = null;
+
+  /**
    * Bound event handler for window messages
    * @type {Function}
    * @private
@@ -164,12 +164,17 @@ export default class LwcGoogleRecaptcha extends LightningElement {
   }
 
   /**
-   * Computes whether the captcha should be displayed based on requiredOnce and isHuman
+   * Computes whether the captcha should be displayed based on requiredOnce, isHuman, and siteKey
    * @returns {boolean} True if captcha should be displayed
    * @readonly
    * @private
    */
   get shouldDisplayCaptcha() {
+    // Only display if siteKey is available
+    if (!this.siteKey) {
+      return false;
+    }
+    
     if (this.requiredOnce) {
       return !this._isHuman;
     }
@@ -190,7 +195,7 @@ export default class LwcGoogleRecaptcha extends LightningElement {
   }
 
   /**
-   * Initializes component state and fetches allowed URLs
+   * Initializes component state and fetches allowed URLs and reCAPTCHA settings
    * @private
    */
   initializeComponent() {
@@ -216,6 +221,28 @@ export default class LwcGoogleRecaptcha extends LightningElement {
       .catch((error) => {
         console.error("ERROR fetching base URLs:", error);
       });
+
+    // Fetch reCAPTCHA settings from Custom Metadata Type
+    if (this.googleRecaptchaSettingName) {
+      getRecaptchaSetting({ settingName: this.googleRecaptchaSettingName })
+        .then((result) => {
+          if (result && result.siteKey) {
+            this.siteKey = result.siteKey;
+          } else {
+            console.error(
+              "No reCAPTCHA settings found for: " +
+                this.googleRecaptchaSettingName
+            );
+          }
+        })
+        .catch((error) => {
+          console.error("ERROR fetching reCAPTCHA settings:", error);
+        });
+    } else {
+      console.error(
+        "googleRecaptchaSettingName is required but not provided"
+      );
+    }
   }
 
   /**
@@ -302,14 +329,14 @@ export default class LwcGoogleRecaptcha extends LightningElement {
     if (this.enableServerSideVerification) {
       this.recaptchaResponse = response;
 
-      // Perform server-side verification
+      // Perform server-side verification using the new method
       const params = {
         recaptchaResponse: this.recaptchaResponse,
-        recaptchaSecretKey: this.secretKey,
+        recaptchaSettingName: this.googleRecaptchaSettingName,
         flowInterviewGuid: this.flowGuid
       };
 
-      isVerified(params)
+      verifyResponse(params)
         .then((result) => {
           if (result === true) {
             // Add delay for requiredOnce animation
