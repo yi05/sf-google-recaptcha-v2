@@ -8,7 +8,7 @@ import GOOGLE_RECAPTCHA from "@salesforce/resourceUrl/Google_Recaptcha";
  * Lightning Web Component for Google reCAPTCHA v2 checkbox integration
  *
  * This component renders a Google reCAPTCHA v2 checkbox within an iframe and handles
- * verification both client-side and server-side. It is designed to work with Salesforce
+ * verification with server-side validation. It is designed to work with Salesforce
  * Flows and can be used in communities, Lightning pages, and external pages with Lightning Out.
  *
  * @component lwcGoogleRecaptcha
@@ -23,7 +23,6 @@ import GOOGLE_RECAPTCHA from "@salesforce/resourceUrl/Google_Recaptcha";
  *     required={true}
  *     required-message="Please complete the captcha"
  *     required-once={false}
- *     enable-server-side-verification={true}
  *     frame-title="I'm not a robot captcha"
  *     flow-guid={flowGuid}
  * ></c-lwc-google-recaptcha>
@@ -93,14 +92,6 @@ export default class LwcGoogleRecaptcha extends LightningElement {
    * @public
    */
   @api requiredOnce = false;
-
-  /**
-   * Enable server-side verification of the reCAPTCHA response
-   * @type {boolean}
-   * @default false
-   * @public
-   */
-  @api enableServerSideVerification = false;
 
   /**
    * Title for the iframe element (for accessibility)
@@ -321,41 +312,37 @@ export default class LwcGoogleRecaptcha extends LightningElement {
 
   /**
    * Handles the Unlock event when user completes reCAPTCHA
-   * Performs server-side verification if enabled
+   * Always performs server-side verification for security
    * @param {string} response - The reCAPTCHA response token
    * @private
    */
   handleUnlock(response) {
-    if (this.enableServerSideVerification) {
-      this.recaptchaResponse = response;
+    this.recaptchaResponse = response;
 
-      // Perform server-side verification using the new method
-      const params = {
-        recaptchaResponse: this.recaptchaResponse,
-        recaptchaSettingName: this.googleRecaptchaSettingName,
-        flowInterviewGuid: this.flowGuid
-      };
+    // Always perform server-side verification for security
+    const params = {
+      recaptchaResponse: this.recaptchaResponse,
+      recaptchaSettingName: this.googleRecaptchaSettingName,
+      flowInterviewGuid: this.flowGuid
+    };
 
-      verifyResponse(params)
-        .then((result) => {
-          if (result === true) {
-            // Add delay for requiredOnce animation
-            if (this.requiredOnce) {
-              // eslint-disable-next-line @lwc/lwc/no-async-operation
-              setTimeout(() => {
-                this._isHuman = true;
-              }, 500);
-            } else {
+    verifyResponse(params)
+      .then((result) => {
+        if (result === true) {
+          // Add delay for requiredOnce animation
+          if (this.requiredOnce) {
+            // eslint-disable-next-line @lwc/lwc/no-async-operation
+            setTimeout(() => {
               this._isHuman = true;
-            }
+            }, 500);
+          } else {
+            this._isHuman = true;
           }
-        })
-        .catch((error) => {
-          console.error("ERROR verifying reCAPTCHA:", error);
-        });
-    } else {
-      this._isHuman = true;
-    }
+        }
+      })
+      .catch((error) => {
+        console.error("ERROR verifying reCAPTCHA:", error);
+      });
   }
 
   /**
