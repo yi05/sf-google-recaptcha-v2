@@ -34,7 +34,7 @@ public with sharing class GoogleRecaptchaHandler {
     public static Boolean isVerified(String recaptchaResponse, String recaptchaSecretKey, String flowInterviewGuid){
         Http http = new Http();
         HttpRequest request = new HttpRequest();
-        request.setEndpoint('https://www.google.com/recaptcha/api/siteverify');
+        request.setEndpoint('callout:Google_reCAPTCHA_Endpoint');
         request.setMethod('POST');
         request.setBody('secret=' + recaptchaSecretKey + '&response=' + recaptchaResponse);
         HttpResponse response = http.send(request);
@@ -146,7 +146,7 @@ public with sharing class GoogleRecaptchaHandler {
             // Make the verification request to Google
             Http http = new Http();
             HttpRequest request = new HttpRequest();
-            request.setEndpoint('https://www.google.com/recaptcha/api/siteverify');
+            request.setEndpoint('callout:Google_reCAPTCHA_Endpoint');
             request.setMethod('POST');
             request.setBody('secret=' + secretKey + '&response=' + recaptchaResponse);
             HttpResponse response = http.send(request);
@@ -155,7 +155,7 @@ public with sharing class GoogleRecaptchaHandler {
                 System.debug(response.getBody());
                 Map<String, Object> result = (Map<String, Object>) JSON.deserializeUntyped(response.getBody());
 
-                if (result.containsKey('success') && result.get('success') == true) {      
+                if (result.containsKey('success') && result.get('success') == true) { 
                     // Store in platform cache
                     Cache.Org.put(getCacheKey(flowInterviewGuid), DateTime.now());
                     return true;      
