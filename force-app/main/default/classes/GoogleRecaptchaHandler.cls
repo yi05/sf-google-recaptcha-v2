@@ -1,18 +1,14 @@
 /**
- * @description Handler class for Google reCAPTCHA v2 integration with Salesforce
+ * @description Handler class for Google reCAPTCHA v2 integration with Salesforce.
  * This class provides server-side verification of reCAPTCHA responses and manages
- * verification state using platform cache.
- * 
- * @author Salesforce Community
- * @version 2.0.0
+ * verification state using Platform Cache.
  */
 public with sharing class GoogleRecaptchaHandler {
 
     /**
-     * @description Fetches the list of allowed base URLs for postMessage security validation
-     * Returns organization domain URLs and their variants for Lightning and Visualforce
-     * 
-     * @return List<String> List of allowed URLs for secure communication
+     * @description Fetch the list of allowed base URLs for postMessage security validation.
+     * Returns organization domain URLs and their variants for Lightning and Visualforce.
+     * @return List<String> List of allowed URLs for secure communication.
      */
     @AuraEnabled
     public static List<String> fetchBaseURL() {
@@ -25,15 +21,14 @@ public with sharing class GoogleRecaptchaHandler {
         return allowedURLs;
     } 
     /**
-     * @description Verifies reCAPTCHA response with Google's verification API
-     * This method is deprecated - use verifyResponse() with Custom Metadata Type settings instead
-     * 
-     * @param recaptchaResponse The response token from Google reCAPTCHA
-     * @param recaptchaSecretKey The secret key for verification
-     * @param flowInterviewGuid The Flow Interview GUID for cache storage
-     * @return Boolean True if verification successful, false otherwise
-     * 
-     * @deprecated Use verifyResponse(String, String, String) instead
+     * @description Verify reCAPTCHA response with Google's verification API.
+     * Deprecated in favor of verifyResponse(String, String, String) which uses Custom Metadata settings.
+     * @param recaptchaResponse The response token from Google reCAPTCHA.
+     * @param recaptchaSecretKey The secret key for verification.
+     * @param flowInterviewGuid The Flow Interview GUID for cache storage.
+     * @return Boolean True if verification successful, false otherwise.
+     * @deprecated Use verifyResponse(String, String, String) instead.
+     * @throws CalloutException If the HTTP callout fails.
      */
     @AuraEnabled
     public static Boolean isVerified(String recaptchaResponse, String recaptchaSecretKey, String flowInterviewGuid){
@@ -63,13 +58,11 @@ public with sharing class GoogleRecaptchaHandler {
     }
     
     /**
-     * @description Validates that reCAPTCHA has been completed for the given Flow Interview
-     * This invocable method checks platform cache for a valid verification record
-     * 
-     * @param flowInterviewGuids List of Flow Interview GUIDs to validate
-     * @return List<Boolean> List of validation results corresponding to input GUIDs
+     * @description Validate that reCAPTCHA has been completed for the given Flow Interview.
+     * This invocable method checks Platform Cache for a valid verification record.
+     * @param flowInterviewGuids List of Flow Interview GUIDs to validate.
+     * @return List<Boolean> List of validation results corresponding to input GUIDs.
      */
-    // Validate the Google reCAPTCHA has been submitted
     @InvocableMethod (label='Validate reCAPTCHA' description='Use the Flow Interview ID to validate the reCAPTCHA has been submitted by user')
     public static List<Boolean> validateRecaptcha(List<String> flowInterviewGuids) {  
         
@@ -95,23 +88,20 @@ public with sharing class GoogleRecaptchaHandler {
     }
 
     /**
-     * @description Generates a cache key for storing verification results
-     * 
-     * @param flowInterviewGuid The Flow Interview GUID
-     * @return String The cache key for platform cache storage
+     * @description Generate a cache key for storing verification results.
+     * @param flowInterviewGuid The Flow Interview GUID.
+     * @return String The cache key for Platform Cache storage.
      */
     public static String getCacheKey(String flowInterviewGuid) {
         return 'local.GoogleRecaptchaVerification.' + flowInterviewGuid.split('-')[0];
     }
 
     /**
-     * @description Retrieves Google reCAPTCHA settings from Custom Metadata Type
-     * Returns only the site key (secret key remains server-side for security)
-     * 
-     * @param settingName The DeveloperName of the GoogleRecaptchaSetting__mdt record
-     * @return Map<String, String> Map containing the site key
+     * @description Retrieve Google reCAPTCHA settings from Custom Metadata Type.
+     * Returns only the site key (secret key remains server-side for security).
+     * @param settingName The DeveloperName of the GoogleRecaptchaSetting__mdt record.
+     * @return Map<String, String> Map containing the site key.
      */
-    // Fetch Google reCAPTCHA settings from Custom Metadata Type
     @AuraEnabled(cacheable=true)
     public static Map<String, String> getRecaptchaSetting(String settingName) {
         Map<String, String> result = new Map<String, String>();
@@ -137,15 +127,14 @@ public with sharing class GoogleRecaptchaHandler {
     }
 
     /**
-     * @description Verifies reCAPTCHA response using settings from Custom Metadata Type
-     * Makes a callout to Google's verification API and stores result in platform cache
-     * 
-     * @param recaptchaResponse The response token from Google reCAPTCHA
-     * @param recaptchaSettingName The DeveloperName of the GoogleRecaptchaSetting__mdt record
-     * @param flowInterviewGuid The Flow Interview GUID for cache storage
-     * @return Boolean True if verification successful, false otherwise
+     * @description Verify reCAPTCHA response using settings from Custom Metadata Type.
+     * Makes a callout to Google's verification API and stores result in Platform Cache.
+     * @param recaptchaResponse The response token from Google reCAPTCHA.
+     * @param recaptchaSettingName The DeveloperName of the GoogleRecaptchaSetting__mdt record.
+     * @param flowInterviewGuid The Flow Interview GUID for cache storage.
+     * @return Boolean True if verification successful, false otherwise.
+     * @throws CalloutException If the HTTP callout fails.
      */
-    // Verify reCAPTCHA response using settings from Custom Metadata Type
     @AuraEnabled
     public static Boolean verifyResponse(String recaptchaResponse, String recaptchaSettingName, String flowInterviewGuid) {
         try {

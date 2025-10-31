@@ -1,12 +1,24 @@
+/**
+ * @description Unit tests for GoogleRecaptchaHandler.
+ * Verifies reCAPTCHA verification flow, allowed base URL retrieval, and HTTP callout handling.
+ */
 @IsTest
 global with sharing class GoogleRecaptchaHandlerTest {
 
+    /**
+     * @description Validate that the deprecated isVerified method returns true with a successful mock response.
+     * @see GoogleRecaptchaHandler#isVerified(String, String, String)
+     */
     @IsTest static void testIsVerified() {
         Test.setMock(HttpCalloutMock.class, new GoogleRecaptchaHandlerTest.RecaptchaHttpCalloutMock());
 
         System.assert(GoogleRecaptchaHandler.isVerified('8djkfhsdfjsd49234734', '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe', 'XXX'));
     }
 
+    /**
+     * @description Ensure fetchBaseURL returns org domain and expected variants.
+     * @see GoogleRecaptchaHandler#fetchBaseURL()
+     */
     @IsTest static void testFetchBaseURL() {
         List<String> myURLs = GoogleRecaptchaHandler.fetchBaseURL();
 
@@ -14,11 +26,14 @@ global with sharing class GoogleRecaptchaHandlerTest {
         System.assert(myURLs.contains(URL.getOrgDomainUrl().toExternalForm()));
     }
 
+    /**
+     * @description HttpCalloutMock to simulate Google's reCAPTCHA verification API response.
+     */
     global class RecaptchaHttpCalloutMock implements HttpCalloutMock {
         // Implement this interface method
             global HTTPResponse respond(HTTPRequest request) {
                 
-                //First create a fake response
+                // First create a fake response
                 HttpResponse response = new HttpResponse();
                 
                 response.setHeader('Content-Type', 'application/json');
