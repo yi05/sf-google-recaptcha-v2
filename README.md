@@ -84,7 +84,7 @@ You can add the LWC component to Lightning App Pages, Record Pages, Home Pages, 
 
 **Required Property:**
 
-- `google-recaptcha-setting-name` (googleRecaptchaSettingName): **Required**. Name of the Custom Metadata Type record (GoogleRecaptchaSetting\_\_mdt) containing your site and secret keys
+- `google-recaptcha-setting-name` (googleRecaptchaSettingName): **Required**. Name of the Custom Metadata Type record (GoogleRecaptchaSetting__mdt) containing your site and secret keys
 
 **Other Properties:**
 
