@@ -8,7 +8,15 @@
         <apexClass>GoogleRecaptchaHandlerTest</apexClass>
         <enabled>true</enabled>
     </classAccesses>
-    <description>Gives access to the GoogleRecaptchaHandler and GoogleRecaptchaHandlerTest class.</description>
+    <classAccesses>
+        <apexClass>DS_GoogleRecaptchaSetting</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <customMetadataTypeAccesses>
+        <enabled>true</enabled>
+        <name>GoogleRecaptchaSetting__mdt</name>
+    </customMetadataTypeAccesses>
+    <description>Gives access to the GoogleRecaptchaHandler, GoogleRecaptchaHandlerTest, and DS_GoogleRecaptchaSetting classes, and the GoogleRecaptchaSetting custom metadata type.</description>
     <hasActivationRequired>false</hasActivationRequired>
     <label>Google Recaptcha Flow Component</label>
 </PermissionSet>
