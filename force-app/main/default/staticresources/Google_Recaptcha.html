@@ -29,11 +29,6 @@
 			if (document.getElementsByTagName("div")[3]) {
 				if (document.getElementsByTagName("div")[3].style.visibility === "visible") {
 					big();
-					// the height of the 6th div need to be set explicitly
-					if(document.getElementsByTagName("div")[5]) {
-						document.getElementsByTagName("div")[5].style.height = "480px";
-						document.getElementsByTagName("div")[5].style.margin = "8px 8px";
-					}	
 					clearInterval(interval);
 				}
 			}
